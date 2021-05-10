@@ -53,7 +53,7 @@ func main() {
 	s1 := ""
 	s2 := "]-("
 	s3 := "} { [()] (()v()) } ])"
-	//s4 := "]-("
+	s4 := "([{]]}"
 
 	// test cases from the problem statement
 
@@ -73,14 +73,17 @@ func main() {
 
 	res, err = nest(s3)
 	if err != nil {
-		//panic(err)
+		panic(err)
 	}
 
 	fmt.Printf("properly nested string: %s\n", res)
-	//fmt.Printf("properly nested string: %s", nest(s4))
-	//fmt.Printf("properly nested string: %s", nest(s5))
 
-	// other cases ?
+	res, err = nest(s4)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("properly nested string: %s\n", res)
 }
 
 // nest returns the shortest properly nested string that contains s as a substring.
