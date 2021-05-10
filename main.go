@@ -1,6 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var (
+	opening = map[string]string{
+		"[": "]",
+		"{": "}",
+		"(": ")",
+	}
+
+	closing = map[string]string{
+		"]": "[",
+		"}": "{",
+		")": "(",
+	}
+)
 
 type Stack []string
 
@@ -15,21 +32,18 @@ func (s *Stack) Push(str string) {
 }
 
 // Top returns the top element without popping it.
-func (s *Stack) Top(str string) string {
+func (s *Stack) Top() string {
 	index := len(*s) - 1
 	return (*s)[index]
 }
 
 // Pop returns and removes the top element on this stack.
-func (s *Stack) Pop() (string, bool) {
-	if s.IsEmpty() {
-		return "", false
-	} else {
-		index := len(*s) - 1
-		element := (*s)[index]
-		*s = (*s)[:index]
-		return element, true
-	}
+func (s *Stack) Pop() string {
+	index := len(*s) - 1
+	element := (*s)[index]
+	*s = (*s)[:index]
+
+	return element
 }
 
 func main() {
@@ -46,8 +60,6 @@ func main() {
 	// other cases ?
 }
 
-// TODO: initialize helper map of brace characters
-
 // nest returns the shortest properly nested string that contains s as a substring.
 func nest(s string) (string, error) {
 	// edge cases: empty string
@@ -56,15 +68,37 @@ func nest(s string) (string, error) {
 	}
 
 	var st Stack
+	res := ""
 	// iterate through string characters
-	for i, c := range s {
+	for _, c := range s {
+		char := string(c)
+
 		// if an opening char -> add it to the stack
+		if _, ok := opening[char]; ok {
+			st.Push(char)
+		}
 
 		// if close char && stack is empty -> append char to the beginning of the result string
+		if _, ok := closing[char]; ok && st.IsEmpty() {
+			res = char + res
+		}
 
 		// if close char && matches what's at top -> pop it from the stack
+		if val, ok := closing[char]; ok && st.Top() == val {
+			st.Pop()
+		}
+
 		// otherwise (not match && not empty), return an error because the substring itself is a mismatch
+		if val, ok := closing[char]; ok && st.Top() != val {
+			return "", errors.New("substring %s can not be properly nested", s)
+		}
 	}
 
 	// after iteration -> for every open char still on the stack, pop them until we have a properly nested result string
+	// this will result in a properly nested string because lingering open braces can be matched at the end
+	for !st.IsEmpty() {
+		res = res + st.Pop()
+	}
+
+	return res, nil
 }
