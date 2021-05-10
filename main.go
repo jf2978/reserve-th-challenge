@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -33,6 +32,10 @@ func (s *Stack) Push(str string) {
 
 // Top returns the top element without popping it.
 func (s *Stack) Top() string {
+	if s.IsEmpty() {
+		return ""
+	}
+
 	index := len(*s) - 1
 	return (*s)[index]
 }
@@ -49,11 +52,31 @@ func (s *Stack) Pop() string {
 func main() {
 	s1 := ""
 	s2 := "]-("
+	s3 := "} { [()] (()v()) } ])"
+	//s4 := "]-("
 
 	// test cases from the problem statement
-	fmt.Printf("properly nested string: %s", nest(s1))
-	fmt.Printf("properly nested string: %s", nest(s2))
-	//fmt.Printf("properly nested string: %s", nest(s3))
+
+	res, err := nest(s1)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("properly nested string: %s\n", res)
+
+	res, err = nest(s2)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("properly nested string: %s\n", res)
+
+	res, err = nest(s3)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("properly nested string: %s\n", res)
 	//fmt.Printf("properly nested string: %s", nest(s4))
 	//fmt.Printf("properly nested string: %s", nest(s5))
 
@@ -72,6 +95,7 @@ func nest(s string) (string, error) {
 	// iterate through string characters
 	for _, c := range s {
 		char := string(c)
+		fmt.Println(char)
 
 		// if an opening char -> add it to the stack
 		if _, ok := opening[char]; ok {
@@ -84,13 +108,13 @@ func nest(s string) (string, error) {
 		}
 
 		// if close char && matches what's at top -> pop it from the stack
-		if val, ok := closing[char]; ok && st.Top() == val {
+		if val, ok := closing[char]; ok && !st.IsEmpty() && st.Top() == val {
 			st.Pop()
 		}
 
-		// otherwise (not match && not empty), return an error because the substring itself is a mismatch
-		if val, ok := closing[char]; ok && st.Top() != val {
-			return "", errors.New("substring %s can not be properly nested", s)
+		// otherwise return an error because the substring itself is a mismatch
+		if val, ok := closing[char]; ok && !st.IsEmpty() && st.Top() != val {
+			return "", fmt.Errorf("substring %s can not be properly nested", s)
 		}
 	}
 
