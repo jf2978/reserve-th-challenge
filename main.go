@@ -73,7 +73,7 @@ func main() {
 
 	res, err = nest(s3)
 	if err != nil {
-		panic(err)
+		//panic(err)
 	}
 
 	fmt.Printf("properly nested string: %s\n", res)
@@ -93,9 +93,8 @@ func nest(s string) (string, error) {
 	var st Stack
 	res := ""
 	// iterate through string characters
-	for _, c := range s {
+	for i, c := range s {
 		char := string(c)
-		//fmt.Println(char)
 
 		// if an opening char -> add it to the stack
 		if _, ok := opening[char]; ok {
@@ -107,14 +106,15 @@ func nest(s string) (string, error) {
 			res = fmt.Sprintf("%s%s", val, res)
 		}
 
-		// if close char && matches what's at top -> pop it from the stack
-		if val, ok := closing[char]; ok && !st.IsEmpty() && st.Top() == val {
-			st.Pop()
-		}
-
-		// otherwise return an error because the substring itself is a mismatch
-		if val, ok := closing[char]; ok && !st.IsEmpty() && st.Top() != val {
-			return "", fmt.Errorf("substring %s can not be properly nested", s)
+		if val, ok := closing[char]; ok && !st.IsEmpty() {
+			// if the top nests our current char, we can just pop it
+			if st.Top() == val {
+				st.Pop()
+			} else if st.Top() != val && i == len(s)-1 {
+				res = fmt.Sprintf("%s%s", val, res)
+			} else { // otherwise return an error because the substring itself is a mismatch
+				return "", fmt.Errorf("substring %s can not be properly nested", s)
+			}
 		}
 
 		res = fmt.Sprintf("%s%s", res, char)
