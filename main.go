@@ -95,7 +95,7 @@ func nest(s string) (string, error) {
 	// iterate through string characters
 	for _, c := range s {
 		char := string(c)
-		fmt.Println(char)
+		//fmt.Println(char)
 
 		// if an opening char -> add it to the stack
 		if _, ok := opening[char]; ok {
@@ -103,8 +103,8 @@ func nest(s string) (string, error) {
 		}
 
 		// if close char && stack is empty -> append char to the beginning of the result string
-		if _, ok := closing[char]; ok && st.IsEmpty() {
-			res = char + res
+		if val, ok := closing[char]; ok && st.IsEmpty() {
+			res = fmt.Sprintf("%s%s", val, res)
 		}
 
 		// if close char && matches what's at top -> pop it from the stack
@@ -116,12 +116,14 @@ func nest(s string) (string, error) {
 		if val, ok := closing[char]; ok && !st.IsEmpty() && st.Top() != val {
 			return "", fmt.Errorf("substring %s can not be properly nested", s)
 		}
+
+		res = fmt.Sprintf("%s%s", res, char)
 	}
 
 	// after iteration -> for every open char still on the stack, pop them until we have a properly nested result string
 	// this will result in a properly nested string because lingering open braces can be matched at the end
 	for !st.IsEmpty() {
-		res = res + st.Pop()
+		res = fmt.Sprintf("%s%s", res, opening[st.Pop()])
 	}
 
 	return res, nil
